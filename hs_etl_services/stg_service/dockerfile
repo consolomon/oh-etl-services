@@ -9,6 +9,8 @@ ARG PG_WAREHOUSE_DBNAME
 ARG PG_WAREHOUSE_USER
 ARG PG_WAREHOUSE_PASSWORD
 
+ARG TELEGRAM_API_ID
+ARG TELEGRAM_API_HASH
 # Update container components
 RUN apt-get update -y
 
@@ -19,9 +21,9 @@ COPY . .
 RUN pip install -r requirements.txt
 
 # Setup sertificate for cloud connection
-RUN mkdir -p /crt
-RUN wget "https://storage.yandexcloud.net/cloud-certs/CA.pem" --output-document /crt/YandexInternalRootCA.crt
-RUN chmod 0600 /crt/YandexInternalRootCA.crt
+# RUN mkdir -p /crt
+# RUN wget "https://storage.yandexcloud.net/cloud-certs/CA.pem" --output-document /crt/YandexInternalRootCA.crt
+# RUN chmod 0600 /crt/YandexInternalRootCA.crt
 
 # Go to /src directiory
 WORKDIR /src

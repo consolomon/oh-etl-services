@@ -4,8 +4,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask
 
 from app_config import AppConfig
-from stg_loader.stg_message_processor import SampleMessageProcessor
-
+from stg_loader.stg_message_processor import StgMessageProcessor
+from stg_loader.stg_chat_processor import StgChatProcessor
 app = Flask(__name__)
 
 
@@ -19,7 +19,14 @@ def health():
 
 @app.post('/api/add_chat')
 def add_chat(chat_name):
-    pass
+
+    app.logger.setLevel(logging.DEBUG)
+
+    config = AppConfig()
+
+    proc = StgChatProcessor(app.logger, config.pg_warehouse_db(), config.pyrogram_client(), chat_name)
+    result = proc.run()
+    return "SUCCESS" if result else "FAILED"
 
 
 if __name__ == '__main__':
@@ -31,7 +38,7 @@ if __name__ == '__main__':
 
     # Инициализируем процессор сообщений.
     # Пока он пустой. Нужен для того, чтобы потом в нем писать логику обработки сообщений из Kafka.
-    proc = SampleMessageProcessor(app.logger)
+    proc = StgMessageProcessor(app.logger)
 
     # Запускаем процессор в бэкграунде.
     # BackgroundScheduler будет по расписанию вызывать функцию run нашего обработчика(SampleMessageProcessor).

@@ -17,6 +17,33 @@ services:
       PG_WAREHOUSE_USER: ${PG_WAREHOUSE_USER}
       PG_WAREHOUSE_PASSWORD: ${PG_WAREHOUSE_PASSWORD}
 
+      TELEGRAM_API_ID: ${TELEGRAM_API_ID}
+      TELEGRAM_API_HASH: ${TELEGRAM_API_HASH}
+
+    network_mode: "bridge"
+    ports:
+      - "5011:5000"
+    restart: unless-stopped
+
+  stg-service:
+    build:
+      context: ./stg_service
+      network: host
+    image: hs-stg-service:alpha-0.0.1
+    container_name: hs-stg-service
+    environment:
+      FLASK_APP: ${SERVICE_APP_NAME:-stg-service}
+      DEBUG: ${SAMPLE_SERVICE_DEBUG:-True}
+
+      PG_WAREHOUSE_HOST: ${PG_WAREHOUSE_HOST}
+      PG_WAREHOUSE_PORT: ${PG_WAREHOUSE_PORT}
+      PG_WAREHOUSE_DBNAME: ${PG_WAREHOUSE_DBNAME}
+      PG_WAREHOUSE_USER: ${PG_WAREHOUSE_USER}
+      PG_WAREHOUSE_PASSWORD: ${PG_WAREHOUSE_PASSWORD}
+
+      TELEGRAM_API_ID: ${TELEGRAM_API_ID}
+      TELEGRAM_API_HASH: ${TELEGRAM_API_HASH}
+
     network_mode: "bridge"
     ports:
       - "5011:5000"
@@ -24,7 +51,7 @@ services:
 
   postgres-db:
     image: postgres:13
-    container_name: oh-postgres-db
+    container_name: hs-postgres-db
     environment:
       POSTGRES_DB: ${PG_WAREHOUSE_DBNAME}
       POSTGRES_USER: ${PG_WAREHOUSE_USER}
@@ -39,7 +66,7 @@ services:
 
   metabase:
     image: metabase/metabase:latest
-    container_name: oh-metabase
+    container_name: hs-metabase
     depends_on:
       postgres-db:
         condition: service_healthy

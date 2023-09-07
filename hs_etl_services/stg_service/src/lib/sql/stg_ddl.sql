@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS stg.messages (
 	message_id integer NOT NULL,
-	from_chat json NOT NULL,
-	from_user json NULL,
+	from_chat integer NOT NULL,
+	from_user integer NULL,
 	message_ts timestamp NOT NULL,
 	link varchar NOT NULL,
 	views_count integer NULL,

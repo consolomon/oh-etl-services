@@ -6,7 +6,7 @@ from psycopg import Connection
 
 
 class PgConnect:
-    def __init__(self, host: str, port: int, db_name: str, user: str, pw: str, sslmode: str = "require") -> None:
+    def __init__(self, host: str, port: int, db_name: str, user: str, pw: str, sslmode: str = "prefer") -> None:
         self.host = host
         self.port = port
         self.db_name = db_name
