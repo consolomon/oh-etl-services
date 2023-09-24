@@ -3,4 +3,6 @@ APScheduler
 psycopg
 psycopg-binary
 pydantic
-flask
+requests
+pyrogram
+tgcrypto

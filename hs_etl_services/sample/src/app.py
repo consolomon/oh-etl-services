@@ -9,30 +9,28 @@ from sample_app.sample_job import SampleMessageProcessor
 app = Flask(__name__)
 
 
-# Заводим endpoint для проверки, поднялся ли сервис.
-# Обратиться к нему можно будет GET-запросом по адресу localhost:5000/health.
-# Если в ответе будет healthy - сервис поднялся и работает.
+# Endpoint to check service status
+# Available through GET-request by address: localhost:5011/health.
 @app.get('/health')
 def health():
     return 'healthy'
 
 
 if __name__ == '__main__':
-    # Устанавливаем уровень логгирования в Debug, чтобы иметь возможность просматривать отладочные логи.
+
+    # Setup log level
     app.logger.setLevel(logging.DEBUG)
 
-    # Инициализируем конфиг. Для удобства, вынесли логику получения значений переменных окружения в отдельный класс.
+    # Setup application config
     config = AppConfig()
 
-    # Инициализируем процессор сообщений.
-    # Пока он пустой. Нужен для того, чтобы потом в нем писать логику обработки сообщений из Kafka.
+    # Setup processor
     proc = SampleMessageProcessor(app.logger)
 
-    # Запускаем процессор в бэкграунде.
-    # BackgroundScheduler будет по расписанию вызывать функцию run нашего обработчика(SampleMessageProcessor).
+    # Setup BackgroundScheduler to run processor by time schedule
     scheduler = BackgroundScheduler()
     scheduler.add_job(func=proc.run, trigger="interval", seconds=config.DEFAULT_JOB_INTERVAL)
     scheduler.start()
 
-    # стартуем Flask-приложение.
+    # run Flask application
     app.run(debug=True, host='0.0.0.0', use_reloader=False)

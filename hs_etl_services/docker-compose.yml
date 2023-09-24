@@ -25,15 +25,15 @@ services:
       - "5011:5000"
     restart: unless-stopped
 
-  stg-service:
+  pyrogram-service:
     build:
-      context: ./stg_service
+      context: ./pyrogram_service
       network: host
-    image: hs-stg-service:alpha-0.0.1
-    container_name: hs-stg-service
+    image: hs-pyrogram-service:alpha-0.0.1
+    container_name: hs-pyrogram-service
     environment:
-      FLASK_APP: ${SERVICE_APP_NAME:-stg-service}
-      DEBUG: ${SAMPLE_SERVICE_DEBUG:-True}
+      PYROGRAM_APP: ${PYROGRAM_SERVICE_APP_NAME:-pyrogram_service}
+      DEBUG: ${PYROGRAM_SERVICE_DEBUG:-True}
 
       PG_WAREHOUSE_HOST: ${PG_WAREHOUSE_HOST}
       PG_WAREHOUSE_PORT: ${PG_WAREHOUSE_PORT}
@@ -43,10 +43,51 @@ services:
 
       TELEGRAM_API_ID: ${TELEGRAM_API_ID}
       TELEGRAM_API_HASH: ${TELEGRAM_API_HASH}
+      TELEGRAM_PHONE_NUMBER: ${TELEGRAM_PHONE_NUMBER}
 
     network_mode: "bridge"
+    restart: "no"
+
+  stg-service:
+    build:
+      context: ./stg_service
+      network: host
+    image: hs-stg-service:alpha-0.1.0
+    container_name: hs-stg-service
+    environment:
+      FLASK_APP: ${SERVICE_APP_NAME:-stg_service}
+      DEBUG: ${SAMPLE_SERVICE_DEBUG:-True}
+
+      FLASK_SECRET_KEY: ${FLASK_SECRET_KEY}
+
+      PG_WAREHOUSE_HOST: ${PG_WAREHOUSE_HOST}
+      PG_WAREHOUSE_PORT: ${PG_WAREHOUSE_PORT}
+      PG_WAREHOUSE_DBNAME: ${PG_WAREHOUSE_DBNAME}
+      PG_WAREHOUSE_USER: ${PG_WAREHOUSE_USER}
+      PG_WAREHOUSE_PASSWORD: ${PG_WAREHOUSE_PASSWORD}
     ports:
       - "5011:5000"
+    restart: unless-stopped
+
+  dds-service:
+    build:
+      context: ./dds_service
+      network: host
+    image: hs-dds-service:alpha-0.0.5
+    container_name: hs-dds-service
+    environment:
+      FLASK_APP: ${SERVICE_APP_NAME:-dds_service}
+      DEBUG: ${SAMPLE_SERVICE_DEBUG:-True}
+
+      FLASK_SECRET_KEY: ${FLASK_SECRET_KEY}
+
+      PG_WAREHOUSE_HOST: ${PG_WAREHOUSE_HOST}
+      PG_WAREHOUSE_PORT: ${PG_WAREHOUSE_PORT}
+      PG_WAREHOUSE_DBNAME: ${PG_WAREHOUSE_DBNAME}
+      PG_WAREHOUSE_USER: ${PG_WAREHOUSE_USER}
+      PG_WAREHOUSE_PASSWORD: ${PG_WAREHOUSE_PASSWORD}
+    ports:
+      - "5012:5000"
     restart: unless-stopped
 
   postgres-db:
@@ -57,7 +98,7 @@ services:
       POSTGRES_USER: ${PG_WAREHOUSE_USER}
       POSTGRES_PASSWORD: ${PG_WAREHOUSE_PASSWORD}
     ports:
-      - ${PG_WAREHOUSE_PORT}:5432
+      - "25432:5432"
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready" ]
       interval: 10s

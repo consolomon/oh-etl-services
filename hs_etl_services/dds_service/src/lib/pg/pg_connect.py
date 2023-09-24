@@ -31,15 +31,36 @@ class Chat(BaseModel):
     is_fake: bool
 
 
+class Position(BaseModel):
+    position_id: int
+    position_name: str
+    position_keywords: str
+
+
+class HPosition(BaseModel):
+    hk_position_id: str
+    position_keywords: str
+
+
+class Technology(BaseModel):
+    tech_id: int
+    tech_name: str
+
+
+class HTechnology(BaseModel):
+    hk_tech_id: str
+    tech_name: str
+
+
 class Message(BaseModel):
     message_id: int
     message_link: str
-    from_chat: str
-    sender_chat: str | None
-    sender_user: str | None
+    from_chat: int
+    sender_chat: int | None
+    sender_user: int | None
     message_ts: datetime
-    views_count: int
-    forwards_count: int
+    views_count: int | None
+    forwards_count: int | None
     message_text: str
     attached_user: str | None
     attached_link: str | None
@@ -47,7 +68,22 @@ class Message(BaseModel):
     attached_hashtags: str | None
 
 
-def get_class_type(class_name: str) -> Type[WfSettings | Chat | Message]:
+class VacancyText(BaseModel):
+    hk_vacancy_id: str
+    load_dt: datetime
+    message_text: str
+
+
+class ResumeText(BaseModel):
+    hk_resume_id: str
+    load_dt: datetime
+    message_text: str
+
+
+def get_class_type(class_name: str) -> Type[
+    WfSettings | Chat | Position | Technology | Message |
+    HPosition | HTechnology | VacancyText | ResumeText
+]:
     match class_name:
         case "Chat":
             return Chat
@@ -55,6 +91,18 @@ def get_class_type(class_name: str) -> Type[WfSettings | Chat | Message]:
             return Message
         case "WfSettings":
             return WfSettings
+        case "Position":
+            return Position
+        case "Technology":
+            return Technology
+        case "HPosition":
+            return HPosition
+        case "HTechnology":
+            return HTechnology
+        case "VacancyText":
+            return VacancyText
+        case "ResumeText":
+            return ResumeText
 
 
 class PgConnect:

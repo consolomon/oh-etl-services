@@ -1,20 +1,15 @@
 import time
 from datetime import datetime
 from logging import Logger
-from hs_etl_services.stg_service.src.lib.pg.pg_connect import PgConnect
-from hs_etl_services.stg_service.src.lib.pyrogram_api.pyrogram_client import PyrogramClient
 
 
-class StgMessageProcessor:
+class SampleMessageProcessor:
     def __init__(
-            self,
-            logger: Logger,
-            pg_connect: PgConnect,
-            pyrogram_client: PyrogramClient
+        self,
+        logger: Logger,
+
     ) -> None:
         self.logger = logger
-        self.pg_connect = pg_connect
-        self.pyrogram_client = pyrogram_client
 
     # функция, которая будет вызываться по расписанию.
     def run(self) -> None:

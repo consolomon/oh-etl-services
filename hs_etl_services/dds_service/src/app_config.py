@@ -5,21 +5,16 @@ from lib.pg import PgConnect
 
 class AppConfig:
 
-    CERTIFICATE_PATH = '/crt/my_CA.crt'
-    CHAT_NAME_FILE_PATH = "/src/chat_names.json"
-    INSERT_STG_POSITION_SCRIPT_PATH = "/src/lib/sql/insert_stg_position.sql"
-    INSERT_STG_TECHNOLOGY_SCRIPT_PATH = "/src/lib/sql/insert_stg_technology.sql"
+    CERTIFICATE_PATH = '/crt/YandexInternalRootCA.crt'
     DEFAULT_JOB_INTERVAL = 60
-    DEFAULT_BATCH_SIZE = 100
 
     def __init__(self) -> None:
+
         self.pg_warehouse_host = str(os.getenv('PG_WAREHOUSE_HOST') or "")
         self.pg_warehouse_port = int(str(os.getenv('PG_WAREHOUSE_PORT') or 0))
         self.pg_warehouse_dbname = str(os.getenv('PG_WAREHOUSE_DBNAME') or "")
         self.pg_warehouse_user = str(os.getenv('PG_WAREHOUSE_USER') or "")
         self.pg_warehouse_password = str(os.getenv('PG_WAREHOUSE_PASSWORD') or "")
-
-        self.FLASK_SECRET_KEY = str(os.getenv('FLASK_SECRET_KEY') or "")
 
     def pg_warehouse_db(self):
         return PgConnect(

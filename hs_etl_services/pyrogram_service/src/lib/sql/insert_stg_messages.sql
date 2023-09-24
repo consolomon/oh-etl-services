@@ -1,0 +1,30 @@
+INSERT INTO stg.messages (
+	message_id,
+	message_link,
+	from_chat,
+	sender_chat,
+	sender_user,
+	message_ts,
+	views_count,
+	forwards_count,
+	message_text,
+	attached_user,
+	attached_link,
+	attached_email,
+	attached_hashtags
+)
+VALUES (
+    %(message_id)s,
+    %(message_link)s,
+    %(from_chat)s,
+    %(sender_chat)s,
+    %(sender_user)s,
+    %(message_ts)s,
+    %(views_count)s,
+    %(forwards_count)s,
+    %(message_text)s,
+    %(attached_user)s,
+    %(attached_link)s,
+    %(attached_email)s,
+    %(attached_hashtags)s
+)
