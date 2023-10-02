@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS stg.messages (
 	forwards_count integer NULL,
 	message_text varchar NULL,
 	attached_user varchar NULL,
+	attached_github varchar NULL,
+	attached_linkedin varchar NULL,
 	attached_link varchar NULL,
 	attached_email varchar NULL,
 	attached_hashtags varchar NULL

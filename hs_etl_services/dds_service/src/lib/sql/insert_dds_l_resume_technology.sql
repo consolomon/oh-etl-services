@@ -5,8 +5,9 @@ INSERT INTO dds.l_resume_technology (
     load_dt
 )
 VALUES (
-    MD5(CONCAT('%(hk_resume_id)s', '%(hk_tech_id)s')),
-    %(hk_resume_id)s,
-    %(hk_tech_id)s,
+    MD5(CONCAT('{hk_resume_id}', '{hk_tech_id}')),
+    '{hk_resume_id}',
+    '{hk_tech_id}',
     NOW()
 )
+ON CONFLICT (hk_l_resume_technology) DO NOTHING;

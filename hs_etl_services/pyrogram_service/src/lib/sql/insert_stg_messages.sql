@@ -9,6 +9,8 @@ INSERT INTO stg.messages (
 	forwards_count,
 	message_text,
 	attached_user,
+	attached_github,
+	attached_linkedin,
 	attached_link,
 	attached_email,
 	attached_hashtags
@@ -24,6 +26,8 @@ VALUES (
     %(forwards_count)s,
     %(message_text)s,
     %(attached_user)s,
+    %(attached_github)s,
+    %(attached_linkedin)s,
     %(attached_link)s,
     %(attached_email)s,
     %(attached_hashtags)s

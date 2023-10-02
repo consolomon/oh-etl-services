@@ -1,5 +1,5 @@
+dotenv
 asyncio
-APScheduler
 psycopg
 psycopg-binary
 pydantic

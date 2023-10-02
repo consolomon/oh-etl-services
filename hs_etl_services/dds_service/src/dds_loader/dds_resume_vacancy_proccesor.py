@@ -6,7 +6,7 @@ from lib.pg.pg_connect import PgConnect, WfSettings, Message
 
 class DdsResumeVacancyProcessor:
 
-    BATCH_LIMIT = 1000
+    BATCH_LIMIT = 2000
 
     SELECT_STG_MESSAGES_SCRIPT_PATH = "/src/lib/sql/select_stg_messages.sql"
     SELECT_WF_SETTINGS_SCRIPT_PATH = "/src/lib/sql/select_wf_settings.sql"
@@ -18,8 +18,10 @@ class DdsResumeVacancyProcessor:
     INSERT_DDS_H_VACANCY_SCRIPT_PATH = "/src/lib/sql/insert_dds_h_vacancy.sql"
     INSERT_DDS_S_VACANCY_INFO_SCRIPT_PATH = "/src/lib/sql/insert_dds_s_vacancy_info.sql"
 
-    RESUME_PATTERN = r"#resume|#cv|my resume|my cv|looking[\s-]?for[\s-]?a[\s-]?job|open[\s-]?to[\s-]?work"
-    VACANCY_PATTERN = r"vacancy|what you will.+do|what we offer|requirements|your responsibilities|job description|we are looking for|company is looking for|what we are looking for"
+    RESUME_PATTERN = r"#resume|#cv|my resume|my cv|looking[\s-]?for[\s-]?a[\s-]?job|open[\s-]?to[\s-]?work|about me:"
+    RESUME_PATTERN_RUS = r"#резюме|моё резюме|ищу[\s-]?работу|о себе:"
+    VACANCY_PATTERN = r"#jobs|vacancy|what you will.+do|what you'll.+do|what we offer|requirement[s]?|responsibility|responsibilities|job description|we are looking for|company is looking for|our benefits|company:"
+    VACANCY_PATTERN_RUS = r"вакансия|обязанности|чем.*заниматься|задачи|требования|мы ищем|компания:|условия:"
     WORK_EXP_PATTERN = r"experience\D+([\d+.]+)\s?(years?)|([\d+.]+)\s?(years?).* experience"
     GRADE_PATTERNS = [r"junior", r"middle", r"senior", r"lead"]
     WORK_FORMAT_PATTERNS = [r"full[\s-]?time", r"part[\s-]?time", r"remote", r"hybrid", r"office", r"freelance"]
@@ -72,9 +74,9 @@ class DdsResumeVacancyProcessor:
             }
         )
         # Process the ways when message list is filled, empty or missing
-        if message_list is None:
-            self.logger.info(f"{datetime.utcnow()}: DDS RESUME VACANCY PROCESSOR: don't have new items to process")
-        elif message_list is not None and message_list is not False:
+        if message_list is False or len(message_list) == 0:
+            self.logger.warning(f"{datetime.utcnow()}: DDS RESUME VACANCY PROCESSOR: don't have new items to process")
+        elif message_list is not False and len(message_list) > 0:
 
             # ETL processing from message into resume or vacancy
             self.logger.info(
@@ -88,7 +90,7 @@ class DdsResumeVacancyProcessor:
                 work_format = self.search_work_format(message)
 
                 # Split messages between resume and vacancy
-                self.logger.info(
+                self.logger.warning(
                     f"{datetime.utcnow()}: DDS RESUME VACANCY PROCESSOR: is resume: {self.is_resume(message)}, is vacancy: {self.is_vacancy(message)}")
                 if self.is_resume(message):
 
@@ -117,6 +119,8 @@ class DdsResumeVacancyProcessor:
                                 "forwards_count": message.forwards_count,
                                 "message_text": message.message_text,
                                 "attached_user": message.attached_user,
+                                "attached_github": message.attached_github,
+                                "attached_linkedin": message.attached_linkedin,
                                 "attached_link": message.attached_link,
                                 "attached_email": message.attached_email,
                                 "attached_hashtags": message.attached_hashtags,
@@ -187,13 +191,15 @@ class DdsResumeVacancyProcessor:
 
     def is_resume(self, message: Message) -> bool:
         try:
-            return len(re.search(self.RESUME_PATTERN, message.message_text, re.IGNORECASE).group()) > 0
+            return (re.search(self.RESUME_PATTERN, message.message_text, re.IGNORECASE) is not None or
+                    re.search(self.RESUME_PATTERN_RUS, message.message_text, re.IGNORECASE) is not None)
         except AttributeError:
             return False
 
     def is_vacancy(self, message: Message) -> bool:
         try:
-            return len(re.search(self.VACANCY_PATTERN, message.message_text, re.IGNORECASE).group()) > 0
+            return (re.search(self.VACANCY_PATTERN, message.message_text, re.IGNORECASE) is not None or
+                    re.search(self.VACANCY_PATTERN_RUS, message.message_text, re.IGNORECASE) is not None)
         except AttributeError:
             return False
 

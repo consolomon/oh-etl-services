@@ -73,7 +73,7 @@ services:
     build:
       context: ./dds_service
       network: host
-    image: hs-dds-service:alpha-0.0.5
+    image: hs-dds-service:alpha-0.0.7
     container_name: hs-dds-service
     environment:
       FLASK_APP: ${SERVICE_APP_NAME:-dds_service}

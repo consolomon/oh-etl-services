@@ -53,6 +53,9 @@ class DdsResumePositionTechnologyProcessor:
         else:
             wf_settings = wf_settings[0]
 
+        self.logger.info(f"{datetime.utcnow()}: DDS RESUME POSITION TECHNOLOGY PROCESSOR: OLD l_resume_position&l_resume_technology wf_settings:")
+        self.logger.info(f"{datetime.utcnow()}: DDS RESUME POSITION TECHNOLOGY PROCESSOR: OLD wf_key: {wf_settings.wf_key}, wf_value: {wf_settings.wf_value}")
+
         # Get a batch of a messages from stg.messages
         resume_list = self.pg_connect.pg_operator(
             log=self.logger,
@@ -66,10 +69,10 @@ class DdsResumePositionTechnologyProcessor:
         )
 
         # Process the ways when resume list is filled, empty or missing
-        if resume_list is None or len(resume_list) == 0:
+        if resume_list is False or len(resume_list) == 0:
             self.logger.info(
                 f"{datetime.utcnow()}: DDS RESUME POSITION TECHNOLOGY PROCESSOR: don't have new items to process")
-        elif resume_list is not None and len(resume_list) > 0:
+        elif resume_list is not False and len(resume_list) > 0:
 
             # ETL processing matches between positions and resumes
             self.logger.info(
@@ -97,7 +100,7 @@ class DdsResumePositionTechnologyProcessor:
             for tech in tech_list:
                 full_pattern += (tech.tech_name + "|")
                 tech_dict[tech.tech_name.lower()] = tech.hk_tech_id
-            full_pattern = full_pattern.removesuffix("|").replace("+", "\+")
+            full_pattern = full_pattern.removesuffix("|").replace("+", "\+").replace(".", "\.")
 
             for resume in resume_list:
 
@@ -124,12 +127,17 @@ class DdsResumePositionTechnologyProcessor:
                         operator_mode="insert",
                         script_args={
                             "hk_resume_id": resume.hk_resume_id,
-                            "hk_tech_id": tech_list[m.lower()],
+                            "hk_tech_id": tech_dict[m.lower()],
                         }
                     )
+                    # Set wf_value as max load_dt in vacancy list
+                    if resume.load_dt > datetime.fromisoformat(wf_settings.wf_value):
+                        wf_settings.wf_value = resume.load_dt.isoformat(sep=" ", timespec="milliseconds")
+
+            self.logger.info(f"{datetime.utcnow()}: DDS RESUME POSITION TECHNOLOGY PROCESSOR: NEW l_resume_position&l_resume_technology wf_settings:")
+            self.logger.info(f"{datetime.utcnow()}: DDS RESUME POSITION TECHNOLOGY PROCESSOR: NEW wf_key: {wf_settings.wf_key}, wf_value: {wf_settings.wf_value}")
 
             # Update wf_value in workflow settings
-            wf_settings.wf_value = resume_list[len(resume_list) - 1].load_dt.isoformat(sep=" ", timespec="milliseconds")
             self.pg_connect.pg_operator(
                 log=self.logger,
                 path_to_script=self.INSERT_WF_SETTINGS_SCRIPT_PATH,

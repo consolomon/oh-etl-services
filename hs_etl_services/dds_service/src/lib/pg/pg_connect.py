@@ -1,3 +1,4 @@
+import re
 from contextlib import contextmanager
 from typing import Generator
 from pathlib import Path
@@ -63,6 +64,8 @@ class Message(BaseModel):
     forwards_count: int | None
     message_text: str
     attached_user: str | None
+    attached_github: str | None
+    attached_linkedin: str | None
     attached_link: str | None
     attached_email: str | None
     attached_hashtags: str | None
@@ -80,9 +83,13 @@ class ResumeText(BaseModel):
     message_text: str
 
 
+class LastLoadDt(BaseModel):
+    load_dt: datetime
+
+
 def get_class_type(class_name: str) -> Type[
     WfSettings | Chat | Position | Technology | Message |
-    HPosition | HTechnology | VacancyText | ResumeText
+    HPosition | HTechnology | VacancyText | ResumeText | LastLoadDt
 ]:
     match class_name:
         case "Chat":
@@ -103,6 +110,8 @@ def get_class_type(class_name: str) -> Type[
             return VacancyText
         case "ResumeText":
             return ResumeText
+        case "LastLoadDt":
+            return LastLoadDt
 
 
 class PgConnect:
@@ -152,8 +161,10 @@ class PgConnect:
             script_args: Optional[Dict] = None
     ) -> Optional[Any]:
         script = Path(path_to_script).read_text()
-        log.info("Prepared script to execute:")
-        log.info(script)
+        match = re.search(r"[{].*[}]", script)
+        if match and script_args is not None:
+            script = script.format(**script_args)
+            script_args = None
         try:
             with self.connection() as conn:
 

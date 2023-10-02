@@ -89,6 +89,8 @@ class StgMessageProcessor:
                         "forwards_count": message["forwards_count"],
                         "message_text": message["message_text"],
                         "attached_user": message["attached_user"],
+                        "attached_github": message["attached_github"],
+                        "attached_linkedin": message["attached_linkedin"],
                         "attached_link": message["attached_user"],
                         "attached_email":  message["attached_email"],
                         "attached_hashtags":  message["attached_hashtags"]
