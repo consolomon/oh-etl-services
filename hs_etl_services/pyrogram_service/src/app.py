@@ -2,20 +2,18 @@ import logging
 import time
 from datetime import datetime
 
-from app_config import AppConfig, pyrogram_client
+from app_config import AppConfig
 from stg_loader.stg_chat_processor import StgChatProcessor
 from stg_loader.stg_message_processor import StgMessageProcessor
 
-
-app = pyrogram_client()
+config = AppConfig()
+app = config.pyrogram_client()
 
 
 def main():
 
-    # Setup service config, pyrogram client and logger
-    config = AppConfig()
+    # Setup logger
     app_logger = logging.getLogger("PYROGRAM CLIENT")
-    app_logger.setLevel(logging.DEBUG)
 
     # Setup processors
 
@@ -24,8 +22,10 @@ def main():
 
     # Init processors
     chat_proc.run()
+    print(f"{datetime.utcnow()}: STG CHAT PROCESSOR: INIT COMPLETED")
     message_proc.run()
-
+    print(f"{datetime.utcnow()}: STG MESSAGE PROCESSOR: INIT COMPLETED")
+    print(f"{datetime.utcnow()}: PYROGRAM CLIENT: START SCHEDULE LOOP")
     while True:
 
         if datetime.utcnow().hour % 8 == 0:

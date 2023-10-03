@@ -1,6 +1,7 @@
 asyncio
 APScheduler
+pydantic
 psycopg
 psycopg-binary
-pydantic
+redis
 flask

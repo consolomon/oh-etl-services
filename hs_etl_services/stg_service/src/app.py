@@ -1,6 +1,4 @@
 import logging
-import json
-from json import JSONDecodeError
 import flask
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -26,39 +24,22 @@ def health():
 @app.post('/api/post_chat')
 def post_chat():
 
-    # setup log level
-    app.logger.setLevel(logging.DEBUG)
-
     # get chat name from request body
     chat_name = flask.request.form.get('chat_name')
 
     # return response message
     if chat_name is not None:
 
-        # Insert chat name as item in file
+        chat_name = chat_name.removeprefix("https://t.me/")
         app.logger.info(f"API POST CHAT: post new chat {chat_name}")
-        # Open the file with new chat names in read and update mode
-        try:
-            file = open(config.CHAT_NAME_FILE_PATH, 'r', encoding="utf-8")
-            # Read the list in current state
-            chat_name_list = list(json.load(file)['chat_name'])
-            # Clean up the file
-            file.close()
-            file = open(config.CHAT_NAME_FILE_PATH, 'w', encoding="utf-8")
-            # Add new chat name into the list and write in the file
-            chat_name_list.append(chat_name)
-            json.dump(obj={"chat_name": chat_name_list}, fp=file)
 
-            app.logger.info(f"API POST CHAT: new chat {chat_name} sent successfully")
-            app.logger.info(f"API POST CHAT: new chats count: {len(chat_name_list)}")
-            app.logger.info(f"API POST CHAT: chat list: {str(chat_name_list)}")
-            # Close updated file
-            file.close()
-        except FileNotFoundError:
-            app.logger.warning(f"API POST CHAT: CHAT_NAME_FILE is not exists! Create a new one")
-            file = open(config.CHAT_NAME_FILE_PATH, 'x', encoding="utf-8")
-            json.dump(obj={"chat_name": []}, fp=file)
-            file.close()
+        redis = config.redis_client()
+        chat_name_list = redis.get("chat_name")
+        if chat_name_list is None:
+            chat_name_list = []
+        chat_name_list.append(chat_name)
+        app.logger.info(f"API POST CHAT: new chats count: {len(chat_name_list)}")
+        redis.set("chat_name", chat_name_list)
 
         return flask.jsonify(
             message="POST SUCCESS",
@@ -76,52 +57,40 @@ def post_chat():
 @app.get('/api/get_chat')
 def get_chat():
 
-    # Setup log level
-    app.logger.setLevel(logging.DEBUG)
-
-    # Get chat name list from local file
     try:
-        file = open(config.CHAT_NAME_FILE_PATH, 'r', encoding="utf-8")
-        chat_name_list = json.load(file)['chat_name']
-        file.close()
-        # return chat_name_list in response body
-        app.logger.info(f"API GET CHAT: post {len(chat_name_list)} new chat names in Pyrogram client")
-        answer = flask.jsonify(
-            chat_name=chat_name_list,
-            message="success",
-            statusCode=200
-        )
-        file = open(config.CHAT_NAME_FILE_PATH, 'w', encoding="utf-8")
-        json.dump(obj={"chat_name": []}, fp=file)
-        file.close()
-        return answer
-    except JSONDecodeError:
-        # Return failed status in response body
-        app.logger.info(f"API GET CHAT: chat_name is empty, send failed status in response")
+        redis = config.redis_client()
+        chat_name_list = redis.get("chat_name")
+        if len(chat_name_list) > 0:
+            app.logger.info(f"API GET CHAT: get {len(chat_name_list)} new chat names in Pyrogram client")
+            # Clear chat_name_list in redis
+            redis.set("chat_name", [])
+            # Return chat_name_list in response body
+            return flask.jsonify(
+                chat_name=chat_name_list,
+                message="success",
+                statusCode=200
+            )
+        else:
+            app.logger.info("API GET CHAT: chat_name list is empty, send failed status in response")
+            return flask.jsonify(
+                chat_name=None,
+                message="failed",
+                statusCode=400
+            )
+
+    except Exception as e:
+        app.logger.error(f"API POST CHAT: occurred error {e}")
         return flask.jsonify(
-            chat_name=None,
-            message="failed",
-            statusCode=400
-        )
-    except FileNotFoundError:
-        app.logger.warning(f"API POST CHAT: CHAT_NAME_FILE is not exists! Create a new one")
-        file = open(config.CHAT_NAME_FILE_PATH, 'x', encoding="utf-8")
-        json.dump(obj={"chat_name": []}, fp=file)
-        file.close()
-        return flask.jsonify(
-            chat_name=None,
-            message="failed",
-            statusCode=400
-        )
+                chat_name=None,
+                message="failed",
+                statusCode=400
+            )
 
 
 # API endpoint to post new position into database
 # Available through GET-request by address: localhost:5011/api/get_chat
 @app.post("/api/post_position")
 def post_position():
-
-    # Setup log level
-    app.logger.setLevel(logging.DEBUG)
 
     # Get new values from request body
     position_name = flask.request.form.get("position_name")
@@ -167,9 +136,6 @@ def post_position():
 
 @app.post("/api/post_technology")
 def post_technology():
-
-    # Setup log level
-    app.logger.setLevel(logging.DEBUG)
 
     # Get new value from request body
     tech_name = flask.request.form.get("tech_name")

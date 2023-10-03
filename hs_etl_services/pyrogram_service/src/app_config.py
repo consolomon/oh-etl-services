@@ -38,7 +38,6 @@ class AppConfig:
         )
 
     def pyrogram_client(self):
-
         client = Client(
             name="hs_explorer",
             api_id=self.telegram_api_id,

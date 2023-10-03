@@ -68,7 +68,7 @@ def get_message_list(client: Client, chat_name: str, limit: int, offset_id: int)
                                 attached_github = url
                             elif match is not None and match.group(2) == "linkedin":
                                 attached_linkedin = url
-                            elif entity.url.__contains__("@") is False:
+                            elif url.__contains__("@") is False:
                                 attached_link = entity.url
 
                         case MessageEntityType.EMAIL:

@@ -103,6 +103,7 @@ class PgConnect:
             selected_class: Optional[str] = None,
             script_args: Optional[Dict] = None
     ) -> Optional[Any]:
+
         script = Path(path_to_script).read_text()
         log.info("Prepared script to execute:")
         log.info(script)
@@ -110,7 +111,6 @@ class PgConnect:
             with self.connection() as conn:
 
                 log.info("Postgres connection success")
-
                 # If operator mode is "INSERT"
                 if operator_mode == 'insert':
                     cur = conn.cursor()
