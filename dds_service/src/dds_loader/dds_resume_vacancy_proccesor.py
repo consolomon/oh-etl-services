@@ -20,8 +20,8 @@ class DdsResumeVacancyProcessor:
 
     RESUME_PATTERN = r"#resume|#cv|my resume|my cv|looking[\s-]?for[\s-]?a[\s-]?job|open[\s-]?to[\s-]?work|about me:"
     RESUME_PATTERN_RUS = r"#резюме|моё резюме|ищу[\s-]?работу|о себе:"
-    VACANCY_PATTERN = r"#jobs|vacancy|what you will.+do|what you'll.+do|what we offer|requirement[s]?|responsibility|responsibilities|job description|we are looking for|company is looking for|our benefits|company:"
-    VACANCY_PATTERN_RUS = r"вакансия|обязанности|чем.*заниматься|задачи|требования|мы ищем|компания:|условия:"
+    VACANCY_PATTERN = r"#jobs|vacancy|what you.*ll do|what we offer|we offer|requirement[s]?|responsibilit|what you.*ll need|nice to have|good to have|job description|we are looking for|company is looking for|our benefits|company:"
+    VACANCY_PATTERN_RUS = r"вакансия|обязанности|чем.*заниматься|что нужно будет делать|мы ожидаем|будет плюсом|мы предлагаем|задачи|требования|мы ищем|компания:|условия:"
     WORK_EXP_PATTERN = r"experience\D+([\d+.]+)\s?(years?)|([\d+.]+)\s?(years?).* experience"
     GRADE_PATTERNS = [r"junior", r"middle", r"senior", r"lead"]
     WORK_FORMAT_PATTERNS = [r"full[\s-]?time", r"part[\s-]?time", r"remote", r"hybrid", r"office", r"freelance"]

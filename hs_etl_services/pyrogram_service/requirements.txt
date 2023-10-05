@@ -1,8 +1,0 @@
-dotenv
-asyncio
-psycopg
-psycopg-binary
-pydantic
-requests
-pyrogram
-tgcrypto

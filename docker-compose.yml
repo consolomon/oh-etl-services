@@ -25,37 +25,14 @@ services:
       - "5011:5000"
     restart: unless-stopped
 
-  pyrogram-service:
+  api-service:
     build:
-      context: ./pyrogram_service
+      context: api_service
       network: host
-    image: hs-pyrogram-service:alpha-0.0.1
-    container_name: hs-pyrogram-service
-    environment:
-      PYROGRAM_APP: ${PYROGRAM_SERVICE_APP_NAME:-pyrogram_service}
-      DEBUG: ${PYROGRAM_SERVICE_DEBUG:-True}
-
-      PG_WAREHOUSE_HOST: ${PG_WAREHOUSE_HOST}
-      PG_WAREHOUSE_PORT: ${PG_WAREHOUSE_PORT}
-      PG_WAREHOUSE_DBNAME: ${PG_WAREHOUSE_DBNAME}
-      PG_WAREHOUSE_USER: ${PG_WAREHOUSE_USER}
-      PG_WAREHOUSE_PASSWORD: ${PG_WAREHOUSE_PASSWORD}
-
-      TELEGRAM_API_ID: ${TELEGRAM_API_ID}
-      TELEGRAM_API_HASH: ${TELEGRAM_API_HASH}
-      TELEGRAM_PHONE_NUMBER: ${TELEGRAM_PHONE_NUMBER}
-
-    network_mode: "bridge"
-    restart: "no"
-
-  stg-service:
-    build:
-      context: ./stg_service
-      network: host
-    image: hs-stg-service:alpha-0.1.1
+    image: hs-api-service:alpha-0.1.2
     container_name: hs-stg-service
     environment:
-      FLASK_APP: ${SERVICE_APP_NAME:-stg_service}
+      FLASK_APP: ${SERVICE_APP_NAME:-api_service}
       DEBUG: ${SAMPLE_SERVICE_DEBUG:-True}
 
       FLASK_SECRET_KEY: ${FLASK_SECRET_KEY}
@@ -75,9 +52,9 @@ services:
 
   dds-service:
     build:
-      context: ./dds_service
+      context: dds_service
       network: host
-    image: hs-dds-service:alpha-0.0.7
+    image: hs-dds-service:alpha-0.1.0
     container_name: hs-dds-service
     environment:
       FLASK_APP: ${SERVICE_APP_NAME:-dds_service}

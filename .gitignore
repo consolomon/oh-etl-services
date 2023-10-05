@@ -1,1 +1,6 @@
-hs_etl_services/.env
+.env
+.vscode
+logs
+
+__pycache__/
+.mypy_cache
