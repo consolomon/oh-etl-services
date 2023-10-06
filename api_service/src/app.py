@@ -3,7 +3,7 @@ import flask
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from app_config import AppConfig
-from stg_loader.sample_job import SampleMessageProcessor
+from lib.api import security, users
 
 app = flask.Flask(__name__)
 # Setup application config with environment variables and constants
@@ -11,18 +11,28 @@ config = AppConfig()
 app.secret_key = config.FLASK_SECRET_KEY
 
 
-# Endpoint to check service status
-# Available through GET-request by address: localhost:5011/health.
 @app.get('/health')
 def health():
+    """
+    Endpoint to check service status
+    Method: GET
+    Address: localhost:5010/health.
+    :return: "healthy"
+    """
     return 'healthy'
 
 
-# API endpoint to post chat_name into Pyrogram Client through local file
-# Available through POST-request by address: localhost:5011/api/post_chat
-# Parameter in request body: chat_name (str)
 @app.post('/api/post_chat')
+@security.key_required
 def post_chat():
+    """
+    API endpoint to post chat_name into Pyrogram Client through Redis
+    Method: POST
+    Address: localhost:5010/api/post_chat
+    Required parameters:
+        form: chat_name: str
+        header: {"x-api-user":"user_name", "x-api-key": "user_key"}
+    """
 
     # get chat name from request body
     chat_name = flask.request.form.get('chat_name')
@@ -52,10 +62,17 @@ def post_chat():
         )
 
 
-# API endpoint to get chat_name from Pyrogram Client
-# Available through GET-request by address: localhost:5011/api/get_chat
 @app.get('/api/get_chat')
+@security.key_required
 def get_chat():
+    """
+    API endpoint to get chat_name from Redis to Pyrogram Client
+    Method: GET
+    Address: localhost:5010/api/get_chat
+    Required parameters:
+        header: {"x-api-user":"user_name", "x-api-key": "user_key"}
+    :return: List[str]
+    """
 
     try:
         redis = config.redis_client()
@@ -83,14 +100,21 @@ def get_chat():
         return flask.jsonify(
                 chat_name=None,
                 message="failed",
-                statusCode=400
+                statusCode=410
             )
 
 
-# API endpoint to post new position into database
-# Available through GET-request by address: localhost:5011/api/get_chat
 @app.post("/api/post_position")
+@security.key_required
 def post_position():
+    """
+    API endpoint to insert position into database
+    Method: POST
+    Address: localhost:5010/api/post_position
+    Required parameters:
+        form: position_name: str, position_keywords: str
+        header: {"x-api-user":"user_name", "x-api-key": "user_key"}
+    """
 
     # Get new values from request body
     position_name = flask.request.form.get("position_name")
@@ -118,13 +142,13 @@ def post_position():
         app.logger.error(f"API POST POSITION: ERROR: position name value is empty, check post request")
         return flask.jsonify(
             message="POST FAILED",
-            statusCode=400
+            statusCode=411
         )
     elif position_keywords is None:
         app.logger.error(f"API POST POSITION: ERROR: position keywords value is empty, check post request")
         return flask.jsonify(
             message="POST FAILED",
-            statusCode=400
+            statusCode=412
         )
     else:
         app.logger.error(f"API POST POSITION: ERROR: request body is empty, check post request")
@@ -135,14 +159,23 @@ def post_position():
 
 
 @app.post("/api/post_technology")
+@security.key_required
 def post_technology():
+    """
+    API endpoint to insert technology into database
+    Method: POST
+    Address: localhost:5010/api/post_technology
+    Required parameters:
+        form: tech_name: str
+        header: {"x-api-user":"user_name", "x-api-key": "user_key"}
+    """
 
     # Get new value from request body
     tech_name = flask.request.form.get("tech_name")
 
     if tech_name is not None:
 
-        # Insert new position into database
+        # Insert new technology into database
         app.logger.info(f"API POST TECHNOLOGY: post new technology {tech_name}")
 
         config.pg_warehouse_db().pg_operator(
@@ -158,9 +191,92 @@ def post_technology():
             statusCode=200
         )
     else:
-        app.logger.error(f"API POST TECHNOLOGY: ERROR: request body is empty, check post request")
+        app.logger.error("API POST TECHNOLOGY: ERROR: request body is empty, check post request")
         return flask.jsonify(
             message="POST FAILED",
+            statusCode=400
+        )
+
+
+@app.post("/api/admin/set_user")
+@security.admin_required
+def set_user():
+
+    # Get new values from request body
+    user_name = flask.request.form.get("user_name")
+
+    if user_name is not None:
+
+        user_key = security.create_api_key(user_name)
+        user_level = flask.request.form.get("user_level", "basic")
+        user = {
+            "user_name": user_name,
+            "user_key": user_key,
+            "user_level": user_level
+        }
+        users.set_user(user, config.API_ADMIN_KEY, config.redis_client())
+        return flask.jsonify(
+            new_user=user,
+            message="SET USER SUCCESS",
+            statusCode=200
+        )
+    else:
+        app.logger.error("API ADMIN SET USER: ERROR: request body is empty, check post request")
+        return flask.jsonify(
+            message="SET USER FAILED",
+            statusCode=400
+        )
+
+
+@app.post("/api/admin/get_user")
+@security.admin_required
+def get_user():
+
+    # Get new values from request body
+    user_name = flask.request.form.get("user_name")
+
+    if user_name is not None:
+
+        user = users.get_user(user_name, config.API_ADMIN_KEY, config.redis_client())
+        if user is not None:
+            return flask.jsonify(
+                user=user,
+                message="GET USER SUCCESS",
+                statusCode=200
+            )
+        else:
+            app.logger.error("API ADMIN SET USER: ERROR: this username is not registered")
+            return flask.jsonify(
+                message="GET USER FAILED",
+                statusCode=410
+            )
+    else:
+        app.logger.error("API ADMIN SET USER: ERROR: request body is empty, check post request")
+        return flask.jsonify(
+            message="GET USER FAILED",
+            statusCode=400
+        )
+
+
+@app.post("/api/admin/delete_user")
+@security.admin_required
+def delete_user():
+
+    # Get new values from request body
+    user_name = flask.request.form.get("user_name")
+
+    if user_name is not None:
+
+        deleted_user = users.delete_user(user_name, config.API_ADMIN_KEY, config.redis_client())
+        return flask.jsonify(
+            deleted_user=deleted_user,
+            message="DELETE USER SUCCESS",
+            statusCode=200
+        )
+    else:
+        app.logger.error("API ADMIN SET USER: ERROR: request body is empty, check post request")
+        return flask.jsonify(
+            message="GET USER FAILED",
             statusCode=400
         )
 
@@ -169,6 +285,9 @@ if __name__ == '__main__':
 
     # Setup log level
     app.logger.setLevel(logging.DEBUG)
+
+    # Setup api_key protection
+    security.init_api_key_check(config)
 
     # Setup processor
     # proc = SampleMessageProcessor(app.logger)
@@ -179,4 +298,4 @@ if __name__ == '__main__':
     # scheduler.start()
 
     # run Flask application
-    app.run(debug=True, host='0.0.0.0', use_reloader=False)
+    app.run(debug=True, host='0.0.0.0', port=5010, use_reloader=False)

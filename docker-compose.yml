@@ -27,15 +27,15 @@ services:
 
   api-service:
     build:
-      context: api_service
+      context: ./api_service
       network: host
-    image: hs-api-service:alpha-0.1.2
-    container_name: hs-stg-service
+    image: hs-api-service:alpha-0.1.5
+    container_name: hs-api-service
     environment:
       FLASK_APP: ${SERVICE_APP_NAME:-api_service}
-      DEBUG: ${SAMPLE_SERVICE_DEBUG:-True}
 
       FLASK_SECRET_KEY: ${FLASK_SECRET_KEY}
+      API_ADMIN_KEY: ${API_ADMIN_KEY}
 
       PG_WAREHOUSE_HOST: ${PG_WAREHOUSE_HOST}
       PG_WAREHOUSE_PORT: ${PG_WAREHOUSE_PORT}
@@ -47,7 +47,7 @@ services:
       REDIS_PORT: ${REDIS_PORT}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
     ports:
-      - "5011:5000"
+      - "5010:5010"
     restart: unless-stopped
 
   dds-service:
@@ -58,7 +58,6 @@ services:
     container_name: hs-dds-service
     environment:
       FLASK_APP: ${SERVICE_APP_NAME:-dds_service}
-      DEBUG: ${SAMPLE_SERVICE_DEBUG:-True}
 
       FLASK_SECRET_KEY: ${FLASK_SECRET_KEY}
 

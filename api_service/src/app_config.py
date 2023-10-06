@@ -7,7 +7,6 @@ from lib.redis.redis_client import RedisClient
 class AppConfig:
 
     CERTIFICATE_PATH = '/crt/my_CA.crt'
-    CHAT_NAME_FILE_PATH = "/src/chat_names.json"
     INSERT_STG_POSITION_SCRIPT_PATH = "/src/lib/sql/insert_stg_position.sql"
     INSERT_STG_TECHNOLOGY_SCRIPT_PATH = "/src/lib/sql/insert_stg_technology.sql"
     DEFAULT_JOB_INTERVAL = 60
@@ -25,6 +24,7 @@ class AppConfig:
         self.redis_password = str(os.getenv("REDIS_PASSWORD") or "")
 
         self.FLASK_SECRET_KEY = str(os.getenv('FLASK_SECRET_KEY') or "")
+        self.API_ADMIN_KEY = str(os.getenv('API_ADMIN_KEY') or "")
 
     def pg_warehouse_db(self) -> PgConnect:
         return PgConnect(

@@ -3,6 +3,7 @@ FROM python:3.10
 
 # Add enviroment arguments
 ARG FLASK_SECRET_KEY
+ARG API_ADMIN_KEY
 
 # Postgres connection arguments
 ARG PG_WAREHOUSE_HOST
@@ -24,11 +25,6 @@ COPY . .
 
 # Setup require packages
 RUN pip install -r requirements.txt
-
-# Setup sertificate for cloud connection
-# RUN mkdir -p /crt
-# RUN wget "https://storage.yandexcloud.net/cloud-certs/CA.pem" --output-document /crt/YandexInternalRootCA.crt
-# RUN chmod 0600 /crt/YandexInternalRootCA.crt
 
 # Go to /src directiory
 WORKDIR /src
