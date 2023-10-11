@@ -56,7 +56,7 @@ class DdsResumeVacancyProcessor:
             wf_settings = WfSettings(
                 wf_id=0,
                 wf_table="resume&vacancy",
-                wf_key="message_ts",
+                wf_key="stg.messages.message_ts",
                 wf_value=datetime.min.isoformat(sep=" ", timespec="milliseconds")
             )
         else:
