@@ -110,6 +110,46 @@ def get_chat():
             )
 
 
+@app.get('/api/admin/get_chat_archive')
+@security.admin_required
+def get_chat_archive():
+    """
+    API endpoint to get chat_name archive from Redis
+    Method: GET
+    Address: localhost:5010/api/admin/get_chat_archive
+    Required parameters:
+        header: {"x-api-user":"user_name", "x-api-key": "user_key"}
+    :return: List[str]
+    """
+
+    try:
+        redis = config.redis_client()
+        chat_name_archive = redis.get("chat_name_archive")
+        if len(chat_name_archive) > 0:
+            app.logger.info(f"API GET CHAT ARCHIVE: get {len(chat_name_archive)} chat names from archive")
+            # Return chat_name_list in response body
+            return flask.jsonify(
+                chat_name=chat_name_archive,
+                message="success",
+                statusCode=200
+            )
+        else:
+            app.logger.info("API GET CHAT: chat_name list is empty, send failed status in response")
+            return flask.jsonify(
+                chat_name=None,
+                message="failed",
+                statusCode=400
+            )
+
+    except Exception as e:
+        app.logger.error(f"API POST CHAT: occurred error {e}")
+        return flask.jsonify(
+                chat_name=None,
+                message="failed",
+                statusCode=410
+            )
+
+
 @app.post("/api/post_position")
 @security.key_required
 def post_position():
