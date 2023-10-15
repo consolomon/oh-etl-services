@@ -168,7 +168,6 @@ class DdsResumeVacancyProcessor:
                         }
                     )
                 else:
-
                     self.pg_connect.pg_operator(
                         log=self.logger,
                         path_to_script=self.INSERT_DDS_H_NOT_MATCH_SCRIPT_PATH,
@@ -208,8 +207,10 @@ class DdsResumeVacancyProcessor:
                     self.logger.warning(
                         f"{datetime.utcnow()}: DDS RESUME VACANCY PROCESSOR: from_chat: {message.from_chat} message_id: {message.message_id}")
 
+                if message.message_ts > datetime.fromisoformat(wf_settings.wf_value):
+                    wf_settings.wf_value = message.message_ts.isoformat(sep=" ", timespec="milliseconds")
+
             # Update wf_value in workflow settings
-            wf_settings.wf_value = message_list[len(message_list) - 1].message_ts.isoformat(sep=" ", timespec="milliseconds")
             self.pg_connect.pg_operator(
                 log=self.logger,
                 path_to_script=self.INSERT_WF_SETTINGS_SCRIPT_PATH,
