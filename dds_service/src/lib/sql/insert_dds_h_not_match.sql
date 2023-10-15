@@ -1,5 +1,5 @@
-INSERT INTO dds.h_resume (
-    hk_resume_id,
+INSERT INTO dds.h_not_match (
+    hk_not_match_id,
 	chat_id,
 	message_id,
 	load_dt
@@ -10,4 +10,4 @@ VALUES (
     %(message_id)s,
     now()
 )
-ON CONFLICT (hk_resume_id) DO NOTHING;
+ON CONFLICT (hk_not_match_id) DO NOTHING;

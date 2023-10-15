@@ -1,0 +1,46 @@
+INSERT INTO dds.s_not_match_info (
+	hk_not_match_id,
+	chat_id,
+	message_id,
+	message_link,
+	sender_chat,
+	sender_user,
+	message_ts,
+	views_count,
+	forwards_count,
+	message_text,
+	attached_user,
+	attached_link,
+	attached_email,
+	attached_hashtags,
+	work_experience,
+	grade,
+	work_format
+)
+VALUES (
+    MD5(CONCAT(%(chat_id)s, %(message_id)s)),
+    %(chat_id)s,
+    %(message_id)s,
+    %(message_link)s,
+    %(sender_chat)s,
+    %(sender_user)s,
+    %(message_ts)s,
+    %(views_count)s,
+    %(forwards_count)s,
+    %(message_text)s,
+    %(attached_user)s,
+    %(attached_link)s,
+    %(attached_email)s,
+    %(attached_hashtags)s,
+    %(work_experience)s,
+    %(grade)s,
+    %(work_format)s
+)
+ON CONFLICT (hk_not_match_id) DO UPDATE
+SET
+    views_count = EXCLUDED.views_count,
+    forwards_count = EXCLUDED.forwards_count,
+    attached_user = EXCLUDED.attached_user,
+    attached_link = EXCLUDED.attached_link,
+    attached_email = EXCLUDED.attached_email
+

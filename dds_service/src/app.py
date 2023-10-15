@@ -51,8 +51,8 @@ if __name__ == '__main__':
     scheduler.add_job(func=position_proc.run, trigger="cron", hour="0,8,16", minute="0")
     scheduler.add_job(func=tech_proc.run, trigger="cron", hour="0,8,16", minute="0")
     scheduler.add_job(func=resume_vacancy_proc.run, trigger="cron", minute="10")
-    scheduler.add_job(func=vacancy_position_tech_proc.run, trigger="cron", minute="20-40/10")
-    scheduler.add_job(func=resume_position_tech_proc.run, trigger="cron", minute="20-40/10")
+    scheduler.add_job(func=vacancy_position_tech_proc.run, trigger="cron", minute="25,35")
+    scheduler.add_job(func=resume_position_tech_proc.run, trigger="cron", minute="25,35")
     scheduler.add_job(func=position_tech_proc.run, trigger="cron", minute="50")
     scheduler.start()
 

@@ -18,10 +18,13 @@ class DdsResumeVacancyProcessor:
     INSERT_DDS_H_VACANCY_SCRIPT_PATH = "/src/lib/sql/insert_dds_h_vacancy.sql"
     INSERT_DDS_S_VACANCY_INFO_SCRIPT_PATH = "/src/lib/sql/insert_dds_s_vacancy_info.sql"
 
+    INSERT_DDS_H_NOT_MATCH_SCRIPT_PATH = "/src/lib/sql/insert_dds_h_not_match.sql"
+    INSERT_DDS_S_NOT_MATCH_INFO_SCRIPT_PATH = "/src/lib/sql/insert_dds_s_not_match_info.sql"
+
     RESUME_PATTERN = r"#resume|#cv|my resume|my cv|looking[\s-]?for[\s-]?a[\s-]?job|open[\s-]?to[\s-]?work|about me:"
     RESUME_PATTERN_RUS = r"#резюме|моё резюме|ищу[\s-]?работу|о себе:"
-    VACANCY_PATTERN = r"#jobs|vacancy|what you.*ll do|what we offer|we offer|requirement[s]?|responsibilit|what you.*ll need|nice to have|good to have|job description|we are looking for|company is looking for|our benefits|company:"
-    VACANCY_PATTERN_RUS = r"вакансия|обязанности|чем.*заниматься|что нужно будет делать|мы ожидаем|будет плюсом|мы предлагаем|задачи|требования|мы ищем|компания:|условия:"
+    VACANCY_PATTERN = r"#jobs|vacancy|what you.*ll do|what we offer|we offer|requirement[s]?|responsibilit|what you.*ll need|we expect|nice to have|good to have|job description|we are looking for|company is looking for|our benefits|company:"
+    VACANCY_PATTERN_RUS = r"вакансия|обязанности|чем.*заниматься|что нужно будет делать|мы ожидаем|будет плюсом|мы предлагаем|задачи|требования|мы ищем|компания:|условия:|наш кандидат|наши ожидания|компенсаци[я,и]?"
     WORK_EXP_PATTERN = r"experience\D+([\d+.]+)\s?(years?)|([\d+.]+)\s?(years?).* experience"
     GRADE_PATTERNS = [r"junior", r"middle", r"senior", r"lead"]
     WORK_FORMAT_PATTERNS = [r"full[\s-]?time", r"part[\s-]?time", r"remote", r"hybrid", r"office", r"freelance"]
@@ -47,7 +50,7 @@ class DdsResumeVacancyProcessor:
             selected_class="WfSettings",
             script_args={
                 "wf_table": "resume&vacancy",
-                "wf_key": "message_ts"
+                "wf_key": "stg.messages.message_ts"
             }
         )
 
@@ -165,6 +168,41 @@ class DdsResumeVacancyProcessor:
                         }
                     )
                 else:
+
+                    self.pg_connect.pg_operator(
+                        log=self.logger,
+                        path_to_script=self.INSERT_DDS_H_NOT_MATCH_SCRIPT_PATH,
+                        operator_mode="insert",
+                        script_args={
+                                "chat_id": message.from_chat,
+                                "message_id": message.message_id,
+                        }
+                    )
+
+                    self.pg_connect.pg_operator(
+                        log=self.logger,
+                        path_to_script=self.INSERT_DDS_S_NOT_MATCH_INFO_SCRIPT_PATH,
+                        operator_mode="insert",
+                        script_args={
+                                "chat_id": message.from_chat,
+                                "message_id": message.message_id,
+                                "message_link": message.message_link,
+                                "sender_chat": message.sender_chat,
+                                "sender_user": message.sender_user,
+                                "message_ts": message.message_ts,
+                                "views_count": message.views_count,
+                                "forwards_count": message.forwards_count,
+                                "message_text": message.message_text,
+                                "attached_user": message.attached_user,
+                                "attached_link": message.attached_link,
+                                "attached_email": message.attached_email,
+                                "attached_hashtags": message.attached_hashtags,
+                                "work_experience": work_experience,
+                                "grade": grade,
+                                "work_format": work_format
+                        }
+                    )
+
                     self.logger.warning(
                         f"{datetime.utcnow()}: DDS RESUME VACANCY PROCESSOR: message didn't feet in vacancy and resume pattern")
                     self.logger.warning(

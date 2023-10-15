@@ -104,8 +104,7 @@ class PgConnect:
             script_args: Optional[Dict] = None
     ) -> Optional[Any]:
         script = Path(path_to_script).read_text()
-        log.info("Prepared script to execute:")
-        log.info(script)
+        log.info(f"Prepared script file to execute: {path_to_script}")
         try:
             with self.connection() as conn:
 

@@ -6,7 +6,7 @@ from lib.pg.pg_connect import PgConnect, WfSettings
 
 class DdsVacancyPositionTechnologyProcessor:
 
-    BATCH_LIMIT = 1000
+    BATCH_LIMIT = 1500
 
     SELECT_WF_SETTINGS_SCRIPT_PATH = "/src/lib/sql/select_wf_settings.sql"
     INSERT_WF_SETTINGS_SCRIPT_PATH = "/src/lib/sql/insert_wf_settings.sql"

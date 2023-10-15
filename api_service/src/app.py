@@ -45,11 +45,17 @@ def post_chat():
 
         redis = config.redis_client()
         chat_name_list = redis.get("chat_name")
+        chat_name_archive = redis.get("chat_name_archive")
         if chat_name_list is None:
             chat_name_list = []
+        if chat_name_archive is None:
+            chat_name_archive = []
         chat_name_list.append(chat_name)
+        chat_name_archive.append(chat_name)
         app.logger.info(f"API POST CHAT: new chats count: {len(chat_name_list)}")
+        app.logger.info(f"API POST CHAT: total chats count in archive: {len(chat_name_archive)}")
         redis.set("chat_name", chat_name_list)
+        redis.set("chat_name_archive", chat_name_archive)
 
         return flask.jsonify(
             message="POST SUCCESS",

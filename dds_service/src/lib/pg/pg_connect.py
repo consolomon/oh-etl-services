@@ -160,11 +160,17 @@ class PgConnect:
             selected_class: Optional[str] = None,
             script_args: Optional[Dict] = None
     ) -> Optional[Any]:
+
+        # Read the script file
         script = Path(path_to_script).read_text()
+        log.info(f"Prepared script file to execute: {path_to_script}")
+
+        # Setup script arguments in {}
         match = re.search(r"[{].*[}]", script)
         if match and script_args is not None:
             script = script.format(**script_args)
             script_args = None
+
         try:
             with self.connection() as conn:
 
