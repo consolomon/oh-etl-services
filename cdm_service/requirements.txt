@@ -1,0 +1,8 @@
+asyncio
+APScheduler
+pydantic
+requests
+psycopg
+psycopg-binary
+redis
+flask
